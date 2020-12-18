@@ -1,10 +1,8 @@
 package Model;
 
 import java.io.DataOutputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class User {
     String username;
@@ -13,6 +11,7 @@ public class User {
     boolean infetado;
     HashSet<String> encontros; //users com quem se encontrou
     DataOutputStream dOatual; //DataOutputStream  do user caso esteja logado senão será null
+    ReentrantLock l = new ReentrantLock();
 
     public User(String username,String password,boolean infetado) {
         this.username=username;
@@ -23,59 +22,145 @@ public class User {
     }
 
     public boolean passwordCorreta(String pass) {
-        return pass.equals(password);
+        try {
+            l.lock();
+            return pass.equals(password);
+        }
+        finally {
+            l.unlock();
+        }
     }
 
     public boolean isInfetado() {
-        return infetado;
+        try {
+            l.lock();
+            return infetado;
+        }
+        finally {
+            l.unlock();
+        }
     }
 
     public void setInfetado() {
-        this.infetado = true;
+        try {
+            l.lock();
+            this.infetado = true;
+        }
+        finally {
+            l.unlock();
+        }
     }
 
     public Tuple<Integer, Integer> getPosicao() {
-        return posicao;
+        try {
+            l.lock();
+            return posicao;
+        }
+        finally {
+            l.unlock();
+        }
     }
 
     public void setPosicao(Tuple<Integer, Integer> posicao) {
-        this.posicao = posicao;
+        try {
+            l.lock();
+            this.posicao = posicao;
+        }
+        finally {
+            l.unlock();
+        }
     }
 
-    public List<String> getEncontros() {
-        return new ArrayList<>(encontros);
+    public Set<String> getEncontros() {
+        try {
+            l.lock();
+            return encontros;
+        }
+        finally {
+            l.unlock();
+        }
     }
 
     public void addEncontro(String userID) {
-        this.encontros.add(userID);
+        try {
+            l.lock();
+            this.encontros.add(userID);
+        }
+        finally {
+            l.unlock();
+        }
     }
 
     public void setdOatual(DataOutputStream dO) {
-        dOatual=dO;
+        try {
+            l.lock();
+            dOatual=dO;
+        }
+        finally {
+            l.unlock();
+        }
     }
 
     public DataOutputStream getdOatual() {
-        return dOatual;
+        try {
+            l.lock();
+            return dOatual;
+        }
+        finally {
+            l.unlock();
+        }
     }
 
     public String getUsername() {
-        return username;
+        try {
+            l.lock();
+            return username;
+        }
+        finally {
+            l.unlock();
+        }
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return username.equals(user.getUsername()) && password.equals(user.getPassword());
+        try {
+            l.lock();
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            User user = (User) o;
+            return username.equals(user.getUsername()) && password.equals(user.getPassword());
+        }
+        finally {
+            l.unlock();
+        }
     }
 
     private String getPassword() {
-        return password;
+        try {
+            l.lock();
+            return password;
+        }
+        finally {
+            l.unlock();
+        }
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getUsername(), password, getPosicao(), isInfetado(), getEncontros(), getdOatual());
+        try {
+            l.lock();
+            return Objects.hash(getUsername(), password, getPosicao(), isInfetado(), getEncontros(), getdOatual());
+        }
+        finally {
+            l.unlock();
+        }
+    }
+
+    public void getLock() {
+        l.lock();
+    }
+
+    public void leaveLock() {
+        l.unlock();
     }
 }

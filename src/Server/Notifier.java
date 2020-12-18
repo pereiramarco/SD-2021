@@ -8,13 +8,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Notifier implements Runnable{
     Map<String,User> users;
-    List<String> usersToNotiy;
+    Set<String> usersToNotiy;
     String notificacao;
+    ReentrantLock l=new ReentrantLock();
 
-    public Notifier(Map<String, User> u, List<String> utn, String note) {
+    public Notifier(Map<String, User> u, Set<String> utn, String note) {
         users=u;
         usersToNotiy = utn;
         notificacao = note;
@@ -23,16 +25,27 @@ public class Notifier implements Runnable{
     @Override
     public void run() {
         try {
+            l.lock();
             for (String idd : usersToNotiy) {
-                DataOutputStream doo = users.get(idd).getdOatual();
-                if (doo != null) {
-                    doo.writeUTF(notificacao);
-                    doo.flush();
+                User us =users.get(idd);
+                try {
+                    us.getLock(); // adquire o lock do user
+                    DataOutputStream doo = us.getdOatual();
+                    if (doo != null) {
+                        doo.writeUTF(notificacao);
+                        doo.flush();
+                    }
+                }
+                finally {
+                    us.leaveLock();
                 }
             }
         }
         catch (IOException e) {
             e.printStackTrace();
+        }
+        finally {
+            l.unlock();
         }
     }
 }

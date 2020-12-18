@@ -1,30 +1,26 @@
 package Client;
 
-import java.io.BufferedReader;
+import View.Output;
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class InputHandler implements Runnable{
     DataOutputStream dO;
-    BufferedReader userIn;
+    Output o;
 
     boolean exit=false;
 
-    public InputHandler(DataOutputStream dO,BufferedReader userIn) {
+    public InputHandler(DataOutputStream dO,Output o) {
         this.dO = dO;
-        this.userIn = userIn;
-    }
-
-    //retorna true enquanto o utilizador estiver dentro do programa
-    public boolean isIn() {
-        return !exit;
+        this.o = o;
     }
 
     @Override
     public void run() {
         String command;
         try {
-            while (!exit && (command = userIn.readLine()) != null) {
+            while (!exit && (command = o.read()) != null) {
                 switch (command) {
                     case "infected":
                     case "quit":
@@ -36,7 +32,7 @@ public class InputHandler implements Runnable{
             }
         }
         catch (IOException e)  {
-            e.printStackTrace();
+            o.error("Ocorreu um erro de Input/Output");
         }
     }
 }

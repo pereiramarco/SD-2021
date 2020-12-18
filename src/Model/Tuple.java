@@ -38,4 +38,9 @@ public class Tuple<T,U> {
     public int hashCode() {
         return Objects.hash(getFirst(), getSecond());
     }
+
+    @Override
+    public String toString() {
+        return "("+first.toString()+","+second.toString()+")";
+    }
 }

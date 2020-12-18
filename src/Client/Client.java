@@ -1,5 +1,7 @@
 package Client;
 
+import View.Output;
+
 import java.io.*;
 import java.net.Socket;
 
@@ -12,17 +14,17 @@ public class Client {
     static ReplyHandler rH;
     static InputHandler iH;
 
-    static BufferedReader userIn;
+    static Output o;
 
     public static void main(String args[]) throws IOException, InterruptedException {
         s = new Socket("localhost", 12345);
         dI = new DataInputStream(new BufferedInputStream(s.getInputStream()));
         dO = new DataOutputStream(new BufferedOutputStream(s.getOutputStream()));
 
-        userIn = new BufferedReader(new InputStreamReader(System.in));
+        o = new Output();
 
-        iH = new InputHandler(dO,userIn);
-        rH = new ReplyHandler(dI,iH);
+        iH = new InputHandler(dO,o);
+        rH = new ReplyHandler(dI,iH,o);
 
         Thread tI = new Thread(iH);
         Thread tR = new Thread(rH);

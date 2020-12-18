@@ -10,6 +10,8 @@ public class Server {
     public static void main(String[] args) throws IOException {
         ServerSocket serverSocket = new ServerSocket(12345);
         Info info = new Info();
+        info.addNewUser("VIP","123");
+        info.addVIP("VIP");
 
         while (true) {
             Socket socket = serverSocket.accept();
