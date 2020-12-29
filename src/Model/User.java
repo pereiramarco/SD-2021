@@ -1,5 +1,7 @@
 package Model;
 
+import Server.TaggedConnection;
+
 import java.io.DataOutputStream;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
@@ -10,8 +12,8 @@ public class User {
     Tuple<Integer,Integer> posicao;
     boolean infetado;
     HashSet<String> encontros; //users com quem se encontrou
-    DataOutputStream dOatual; //DataOutputStream  do user caso esteja logado senão será null
-    ReentrantLock l = new ReentrantLock();
+    TaggedConnection dOatual; //TaggedConnection do user caso esteja logado senão será null
+    static ReentrantLock l = new ReentrantLock();
 
     public User(String username,String password,boolean infetado) {
         this.username=username;
@@ -91,7 +93,7 @@ public class User {
         }
     }
 
-    public void setdOatual(DataOutputStream dO) {
+    public void setTCatual(TaggedConnection dO) {
         try {
             l.lock();
             dOatual=dO;
@@ -101,7 +103,7 @@ public class User {
         }
     }
 
-    public DataOutputStream getdOatual() {
+    public TaggedConnection getTCatual() {
         try {
             l.lock();
             return dOatual;
@@ -149,7 +151,7 @@ public class User {
     public int hashCode() {
         try {
             l.lock();
-            return Objects.hash(getUsername(), password, getPosicao(), isInfetado(), getEncontros(), getdOatual());
+            return Objects.hash(getUsername(), password, getPosicao(), isInfetado(), getEncontros(), getTCatual());
         }
         finally {
             l.unlock();

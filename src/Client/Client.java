@@ -1,6 +1,7 @@
 package Client;
 
-import View.Output;
+import Server.TaggedConnection;
+import View.IO;
 
 import java.io.*;
 import java.net.Socket;
@@ -14,17 +15,18 @@ public class Client {
     static ReplyHandler rH;
     static InputHandler iH;
 
-    static Output o;
+    static IO o;
 
     public static void main(String args[]) throws IOException, InterruptedException {
         s = new Socket("localhost", 12345);
-        dI = new DataInputStream(new BufferedInputStream(s.getInputStream()));
-        dO = new DataOutputStream(new BufferedOutputStream(s.getOutputStream()));
 
-        o = new Output();
+        o = new IO(); // Classe responsável pela View
+        TaggedConnection tC = new TaggedConnection(s);
 
-        iH = new InputHandler(dO,o);
-        rH = new ReplyHandler(dI,iH,o);
+        iH = new InputHandler(tC,o); //criação do handler para o input do user
+        rH = new ReplyHandler(tC,iH,o); //criação do handler para as respostas do servidor
+
+        //são threads independentes e devem correr em simultâneo
 
         Thread tI = new Thread(iH);
         Thread tR = new Thread(rH);

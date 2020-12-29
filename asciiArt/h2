@@ -16,7 +16,7 @@ ________________________________________________________________________________
   $$    infected - Comunicar que está infetado                               $$     $$  para sair $$
   $$    help - Ajuda                                                         $$     $$            $$
   $$    logout - Terminar Sessão                                             $$     $$$$$$$$$$$$$$$$
-  $$    getMapData - Quantos utilizadores e doentes visitaram cada posição   $$      | | | | | | |
+  $$    makeImportant - Dar acesso a funcionalidades extra a este Utilizador $$      | | | | | | |
   $$                                                                         $$      | | | | | | |
   $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$      | | | | | | |
                                                                                      | | | | | | |
