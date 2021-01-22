@@ -32,11 +32,11 @@ public class NotifierEmptyPosition implements Runnable{
                 c.await();
             }
             u.lock();
-            TaggedConnection dO = u.getTCatual();
-            List<byte[]> l = new ArrayList<>();
-            l.add(String.valueOf(pos.getFirst()).getBytes()); //adiciona a posição X à lista de informações a enviar
-            l.add(String.valueOf(pos.getSecond()).getBytes()); //adiciona a posição Y à lista de informações a enviar
-            dO.send(new Frame(Tag.REMINDWHENEMPTY,l));
+            TaggedConnection tc = u.getTCatual();
+            List<byte[]> data = new ArrayList<>();
+            data.add(String.valueOf(pos.getFirst()).getBytes()); //adiciona a posição X à lista de informações a enviar
+            data.add(String.valueOf(pos.getSecond()).getBytes()); //adiciona a posição Y à lista de informações a enviar
+            tc.send(new Frame(Tag.REMINDWHENEMPTY,data));
         }
         catch (InterruptedException | IOException e) {
             e.printStackTrace();
@@ -51,8 +51,7 @@ public class NotifierEmptyPosition implements Runnable{
         try {
             l.lock();
             c.signal();
-        }
-        finally {
+        } finally {
             l.unlock();
         }
     }
