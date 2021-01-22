@@ -60,13 +60,13 @@ public class Info {
         }
     }
 
-    public boolean addNewUser(Tuple<String,String> userInfo) {
+    public boolean addNewUser(String username, String password) {
         try {
             wl.lock();
-            if (users.containsKey(userInfo.first)) { // se já existir o user retorna falso
+            if (users.containsKey(username)) { // se já existir o user retorna falso
                 return false;
             } else {
-                users.put(userInfo.first, new User(userInfo.first,userInfo.second,false)); //adiciona o novo user
+                users.put(username, new User(username, password)); //adiciona o novo user
             }
             return true;
         }
@@ -111,18 +111,19 @@ public class Info {
         }
     }
 
-    public void addPedido(Tuple<Integer,Integer> coords,NotifierEmptyPosition c) {
-        Set<NotifierEmptyPosition> t;
+    public void addPedido(Tuple<Integer,Integer> coords,NotifierEmptyPosition notifier) {
+        Set<NotifierEmptyPosition> setNotifiers;
+
         try {
             wl.lock();
             if (pedidos.containsKey(coords)) {
-                t = pedidos.get(coords);
+                setNotifiers = pedidos.get(coords);
             }
             else {
-                t = new HashSet<>();
-                pedidos.put(coords,t); // adiciona os pedidos de remindWhenEmpty à posiçºao onde pertencem
+                setNotifiers = new HashSet<>();
+                pedidos.put(coords,setNotifiers); // adiciona os pedidos de remindWhenEmpty à posiçºao onde pertencem
             }
-            t.add(c);
+            setNotifiers.add(notifier);
         }
         finally {
             wl.unlock();
@@ -132,7 +133,7 @@ public class Info {
     public boolean isPassCorreta(String userID,String pass) {
         try {
             wl.lock();
-            return users.containsKey(userID) && users.get(userID).passwordCorreta(pass);
+            return users.get(userID).passwordCorreta(pass);
         }
         finally {
             wl.unlock();
@@ -214,11 +215,15 @@ public class Info {
 
     public void signalPedidos(Tuple<Integer,Integer> pos) {
         if (pedidos.containsKey(pos)) {
-            Set<NotifierEmptyPosition> c = pedidos.get(pos);
-            for (NotifierEmptyPosition cc : c) { // dá signal a cada um dos pedidos de remindWhenEmpty quando a posição fica finalmente vazia
-                cc.signal();
+            Set<NotifierEmptyPosition> notifiersDaPosicao = pedidos.get(pos);
+            for (NotifierEmptyPosition notifier : notifiersDaPosicao) { // dá signal a cada um dos pedidos de remindWhenEmpty quando a posição fica finalmente vazia
+                notifier.signal();
             }
         }
+    }
+
+    public boolean userExiste(String username) {
+        return users.containsKey(username);
     }
 
     public User getUser(String userID) {
