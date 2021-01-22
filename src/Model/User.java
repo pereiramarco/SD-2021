@@ -2,7 +2,6 @@ package Model;
 
 import Server.TaggedConnection;
 
-import java.io.DataOutputStream;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -15,11 +14,11 @@ public class User {
     TaggedConnection dOatual; //TaggedConnection do user caso esteja logado senão será null
     static ReentrantLock l = new ReentrantLock();
 
-    public User(String username,String password,boolean infetado) {
+    public User(String username,String password) {
         this.username=username;
         this.password=password;
         this.posicao= null;
-        this.infetado=infetado;
+        this.infetado=false;
         this.encontros = new HashSet<>();
     }
 
