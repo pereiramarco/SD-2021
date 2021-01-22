@@ -11,7 +11,7 @@ public class User {
     String password;
     Tuple<Integer,Integer> posicao;
     boolean infetado;
-    HashSet<String> encontros; //users com quem se encontrou
+    Set<String> encontros; //users com quem se encontrou
     TaggedConnection dOatual; //TaggedConnection do user caso esteja logado senão será null
     static ReentrantLock l = new ReentrantLock();
 
@@ -158,11 +158,11 @@ public class User {
         }
     }
 
-    public void getLock() {
+    public void lock() {
         l.lock();
     }
 
-    public void leaveLock() {
+    public void unlock() {
         l.unlock();
     }
 }

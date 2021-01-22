@@ -15,7 +15,7 @@ public class NotifyInfectedContact implements Runnable{
     @Override
     public void run() {
         try {
-            tC.send(new Frame(Tag.DANGER,new ArrayList<>()));
+            tC.send(new Frame(Tag.DANGER,null));
         } catch (IOException e) {
             e.printStackTrace();
         }

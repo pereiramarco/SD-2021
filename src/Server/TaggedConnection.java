@@ -37,7 +37,7 @@ public class TaggedConnection implements AutoCloseable {
         try {
             wlock.lock();
             dO.writeUTF(tag.name());
-            s=data.size();
+            s=data==null ? 0 : data.size();
             dO.writeInt(s);
             while (i<s) { //escreve cada argumento na lista
                 dO.writeInt(data.get(i).length);

@@ -10,7 +10,6 @@ import Exceptions.LoggedInException;
 import Exceptions.PassIncorretaException;
 import Exceptions.UtilizadorExistenteException;
 import Model.*;
-import Utils.Colors;
 import Utils.Frame;
 import Utils.Tag;
 
@@ -136,7 +135,7 @@ public class ServerConnection implements Runnable {
                         case HELP:
                             String filename;
                             if (loggedIn) {
-                                 filename = info.isVIP(userInfo.getFirst()) ?"h1" : "h2"; // se estiver logado e for VIP irá apresentar um menu de ajudas diferente
+                                 filename = info.isVIP(userInfo.getFirst()) ? "h1" : "h2"; // se estiver logado e for VIP irá apresentar um menu de ajudas diferente
                             }
                             else filename = "h3";
                             data.add(filename.getBytes());
@@ -151,7 +150,7 @@ public class ServerConnection implements Runnable {
                                 for (Map.Entry<Tuple<Integer,Integer>,Tuple<Integer,Integer>> t : info.getMapData().entrySet()) {
                                     data.add(String.valueOf(t.getKey().getFirst()).getBytes()); // adiciona X
                                     data.add(String.valueOf(t.getKey().getSecond()).getBytes()); // adiciona Y
-                                    data.add(String.valueOf(t.getValue().getFirst()).getBytes()); //adiciona utilziadores que estiveram em  X Y
+                                    data.add(String.valueOf(t.getValue().getFirst()).getBytes()); //adiciona utilizadores que estiveram em  X Y
                                     data.add(String.valueOf(t.getValue().getSecond()).getBytes()); //adiciona doentes que estiveram em X Y
                                     tC.send(new Frame(Tag.GETMAPDATA,data));
                                 }

@@ -18,7 +18,7 @@ public class NotifierEmptyPosition implements Runnable{
     ReentrantLock l=new ReentrantLock();
     Condition c = l.newCondition();
 
-    public NotifierEmptyPosition(Info iG, User uG, Tuple<Integer,Integer> posG ) {
+    public NotifierEmptyPosition(Info iG, User uG, Tuple<Integer,Integer> posG) {
         i=iG;
         u=uG;
         pos = posG;
@@ -31,7 +31,7 @@ public class NotifierEmptyPosition implements Runnable{
             while (i.getNumOfPeopleOn(pos)!=0){
                 c.await();
             }
-            u.getLock();
+            u.lock();
             TaggedConnection dO = u.getTCatual();
             List<byte[]> l = new ArrayList<>();
             l.add(String.valueOf(pos.getFirst()).getBytes()); //adiciona a posição X à lista de informações a enviar
@@ -42,7 +42,7 @@ public class NotifierEmptyPosition implements Runnable{
             e.printStackTrace();
         }
         finally {
-            u.leaveLock();
+            u.unlock();
             l.unlock();
         }
     }
