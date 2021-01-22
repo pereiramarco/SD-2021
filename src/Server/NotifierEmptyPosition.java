@@ -18,9 +18,9 @@ public class NotifierEmptyPosition implements Runnable{
     ReentrantLock l=new ReentrantLock();
     Condition c = l.newCondition();
 
-    public NotifierEmptyPosition(Info iG, User uG, Tuple<Integer,Integer> posG) {
+    public NotifierEmptyPosition(Info iG,String username, Tuple<Integer,Integer> posG) {
         i=iG;
-        u=uG;
+        u= iG.getUser(username);
         pos = posG;
     }
 

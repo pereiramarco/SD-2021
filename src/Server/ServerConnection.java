@@ -162,7 +162,7 @@ public class ServerConnection implements Runnable {
         Tuple<Integer,Integer> position=new Tuple<>(Integer.valueOf(new String(commandData.get(0))),
                 Integer.valueOf(new String(commandData.get(1))));
         // lançar uma classe que ficará à espera que a posição fique vazia
-        NotifierEmptyPosition net = new NotifierEmptyPosition(this.info,this.info.getUser(username),position);
+        NotifierEmptyPosition net = new NotifierEmptyPosition(this.info,username,position);
         Thread th  = new Thread(net);
 
         th.start();
