@@ -9,15 +9,12 @@ import java.net.Socket;
 public class Client {
     static Socket s;
 
-    static DataInputStream dI;
-    static DataOutputStream dO;
-
     static ReplyHandler rH;
     static InputHandler iH;
 
     static IO o;
 
-    public static void main(String args[]) throws IOException, InterruptedException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         s = new Socket("localhost", 12345);
 
         o = new IO(); // Classe responsável pela View
