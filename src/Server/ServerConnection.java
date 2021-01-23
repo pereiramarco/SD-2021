@@ -18,18 +18,20 @@ public class ServerConnection implements Runnable {
     private final Info info;
     private String username; // username fo utilizador a utilizar a conexão de momento
     private boolean loggedIn; // se o cliente que está a usar a conexão já se autenticou
+    private boolean online;
 
     public ServerConnection (TaggedConnection tCG, Info info) {
         this.tC = tCG;
         this.info = info;
         this.username=null;
         this.loggedIn=false;
+        this.online = true;
     }
 
     @Override
     public void run() {
         try {
-            while (this.tC.isConnected()) {
+            while (this.online) {
                 Frame command = this.tC.receive();
                 List<byte[]> data = new ArrayList<>(); //data a enviar no frame de resposta
                 try {
@@ -72,10 +74,9 @@ public class ServerConnection implements Runnable {
         boolean worked = this.info.addNewUser(username, password);
         if (!worked) throw new UtilizadorExistenteException("Utilizador já existente");
         else  {
-            List<byte[]> data = new ArrayList<>(); //data a enviar no frame de resposta
             this.username=username;
             this.loggedIn=true;
-            this.tC.send(new Frame(Tag.SIGNUP,data));
+            this.tC.send(new Frame(Tag.SIGNUP,null));
             this.info.addDOAtualToUser(username,this.tC); // se o login for sucessful queremos mudar a TaggedConnection
         }
     }
@@ -166,7 +167,6 @@ public class ServerConnection implements Runnable {
         Thread th  = new Thread(net);
 
         th.start();
-        this.info.addPedido(position,net); //adiciona pedido de RemindWhenEmpty
     }
 
     private void infected() throws LoggedInException, IOException {
@@ -192,6 +192,7 @@ public class ServerConnection implements Runnable {
 
         this.tC.send(new Frame(Tag.QUIT,null));
         this.tC.close();
+        this.online = false;
     }
 
     private void help() throws IOException {
