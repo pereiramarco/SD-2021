@@ -18,8 +18,7 @@ public class Server {
 
         while (true) {
             Socket socket = serverSocket.accept();
-            Thread worker = new Thread(new ServerConnection(new TaggedConnection(socket), info));
-            worker.start();
+            new Thread(new ServerConnection(new TaggedConnection(socket), info)).start();
         }
     }
 }

@@ -10,24 +10,25 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 // Informação que o Servidor tem de reter
 public class Info {
-    private Map<Tuple<Integer,Integer>, Set<String>> mapa; //a chave será a localização e o value será uma lista dos ids dos utilizadores que estão nessa mesma localização
+    private Tuple<Integer,Integer> mapDimensions;
+    private Map<Tuple<Integer,Integer>, Posicao> mapa; //a chave será a localização e o value será uma lista dos ids dos utilizadores que estão nessa mesma localização
     private Map<String,User> users; //todos os users no sistema
-    private Map<Tuple<Integer,Integer>,Set<NotifierEmptyPosition>> pedidos; // Set de pedidos de remindWhenEmpty por cada posição no Map
     private Set<String> vipUsers; // utilizadores que são vip
-    private Map<Tuple<Integer,Integer>,Set<String>> posicoes; // mapa de posições para lista de utilizadores que já lá estiveram
     private ReentrantReadWriteLock l;
     private ReentrantReadWriteLock.ReadLock rl;
     private ReentrantReadWriteLock.WriteLock wl;
 
     public Info() {
+        mapDimensions = new Tuple<>(40,40);
         mapa = new HashMap<>();
         users = new HashMap<>();
         l = new ReentrantReadWriteLock();
         rl = l.readLock();
         wl = l.writeLock();
-        pedidos=new HashMap<>();
         vipUsers=new HashSet<>();
-        posicoes=new HashMap<>();
+        for(int i = 0; i < mapDimensions.getFirst(); i++)
+            for(int j = 0 ; j < mapDimensions.getSecond(); j++)
+                mapa.put(new Tuple<>(i,j),new Posicao());
     }
 
     public void updateCoords(Tuple<Integer,Integer> pos,String id) {
@@ -36,20 +37,12 @@ public class Info {
             Set<String> s;
             User user = users.get(id);
             Tuple<Integer,Integer> poss=user.getPosicao();
-            Set<String> us = posicoes.computeIfAbsent(pos, k -> new HashSet<>());
-            us.add(id);
+            mapa.get(pos).addUser(id);
             if (poss!=null && mapa.containsKey(poss)) { // se tiver posição anterior remove-o dessa posição
-                mapa.get(poss).remove(id);
+                mapa.get(poss).removeUser(id);
             }
-            if (mapa.containsKey(pos)) { // checka se o mapa já tem info sobre essa posição
-                s = mapa.get(pos);
-            } else {
-                s = new HashSet<>();
-            }
-            s.add(id);
-            mapa.put(pos, s);
             user.setPosicao(pos); // atualiza posição do user
-            for (String userID : mapa.get(pos)) { // para todos os useres na posição atual do user adiciona-os aos encontros do user que se moveu agora para lá e adiciona o user aos encontros dos que estavam nessa localização
+            for (String userID : mapa.get(pos).getUsersPosAtual()) { // para todos os useres na posição atual do user adiciona-os aos encontros do user que se moveu agora para lá e adiciona o user aos encontros dos que estavam nessa localização
                 if (!userID.equals(id)) {
                     user.addEncontro(userID);
                     users.get(userID).addEncontro(user.getUsername());
@@ -100,32 +93,13 @@ public class Info {
             wl.lock();
             User u = users.get(user);
             u.setInfetado();
-            mapa.get(u.getPosicao()).remove(u.username); // remove o infetado da posição pois assume-se que ele volta para casa
+            mapa.get(u.getPosicao()).removeUser(u.username); // remove o infetado da posição pois assume-se que ele volta para casa
             u.setPosicao(null);
             for (String us : u.getEncontros()) { // notifica cada um dos users com quem esteve em contacto de que estiveram emc ontacto com um infetado
                 Thread th = new Thread(new NotifyInfectedContact(users.get(us).getTCatual()));
                 th.start();
             }
         } finally {
-            wl.unlock();
-        }
-    }
-
-    public void addPedido(Tuple<Integer,Integer> coords,NotifierEmptyPosition notifier) {
-        Set<NotifierEmptyPosition> setNotifiers;
-
-        try {
-            wl.lock();
-            if (pedidos.containsKey(coords)) {
-                setNotifiers = pedidos.get(coords);
-            }
-            else {
-                setNotifiers = new HashSet<>();
-                pedidos.put(coords,setNotifiers); // adiciona os pedidos de remindWhenEmpty à posiçºao onde pertencem
-            }
-            setNotifiers.add(notifier);
-        }
-        finally {
             wl.unlock();
         }
     }
@@ -141,11 +115,9 @@ public class Info {
     }
 
     public int getNumOfPeopleOn(Tuple<Integer, Integer> pos) {
-        int r=0;
         try {
             rl.lock();
-            if (mapa.containsKey(pos)) r=mapa.get(pos).size();
-            return r;
+            return mapa.get(pos).nmrPeopleOn();
         }
         finally {
             rl.unlock();
@@ -183,20 +155,20 @@ public class Info {
     }
 
     public Map<Tuple<Integer,Integer>,Tuple<Integer,Integer>> getMapData() {
-        Map<Tuple<Integer,Integer>,Tuple<Integer,Integer>> mapa=new HashMap<>();
+        Map<Tuple<Integer,Integer>,Tuple<Integer,Integer>> res = new HashMap<>();
         try {
             rl.lock();
-            for (Map.Entry<Tuple<Integer,Integer>,Set<String>> t : posicoes.entrySet()) { // em todas as posições verifica se para cada user no Set dessa posição está infetado ou não
+            for (Map.Entry<Tuple<Integer,Integer>,Posicao> t : mapa.entrySet()) { // em todas as posições verifica se para cada user no Set dessa posição está infetado ou não
                 int u=0,d=0;
-                for (String s : t.getValue()) {
+                for (String s : t.getValue().getHistorico()) {
                     if (isInfetado(s))
                         d++;
                     else u++;
                 }
-                mapa.put(t.getKey(),new Tuple<>(u,d));
+                res.put(t.getKey(),new Tuple<>(u,d));
             }
 
-            return mapa;
+            return res;
         }
         finally {
             rl.unlock();
@@ -213,15 +185,25 @@ public class Info {
         }
     }
 
-    public void signalPedidos(Tuple<Integer,Integer> pos) {
-        if (pedidos.containsKey(pos)) {
-            Set<NotifierEmptyPosition> notifiersDaPosicao = pedidos.get(pos);
-            for (NotifierEmptyPosition notifier : notifiersDaPosicao) { // dá signal a cada um dos pedidos de remindWhenEmpty quando a posição fica finalmente vazia
-                notifier.signal();
-            }
+    public Posicao getPosicao(Tuple<Integer,Integer> coord) {
+        try {
+            rl.lock();
+            return mapa.get(coord);
+        } finally {
+            rl.unlock();
         }
     }
 
+
+    public void signalPedidos(Tuple<Integer,Integer> pos) {
+        try {
+            rl.lock();
+            mapa.get(pos).signallAll();
+        } finally {
+            rl.unlock();
+        }
+    }
+// -> NO LOCK?? //
     public boolean userExiste(String username) {
         return users.containsKey(username);
     }

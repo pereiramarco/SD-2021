@@ -72,10 +72,9 @@ public class ServerConnection implements Runnable {
         boolean worked = this.info.addNewUser(username, password);
         if (!worked) throw new UtilizadorExistenteException("Utilizador já existente");
         else  {
-            List<byte[]> data = new ArrayList<>(); //data a enviar no frame de resposta
             this.username=username;
             this.loggedIn=true;
-            this.tC.send(new Frame(Tag.SIGNUP,data));
+            this.tC.send(new Frame(Tag.SIGNUP,null));
             this.info.addDOAtualToUser(username,this.tC); // se o login for sucessful queremos mudar a TaggedConnection
         }
     }
@@ -166,7 +165,6 @@ public class ServerConnection implements Runnable {
         Thread th  = new Thread(net);
 
         th.start();
-        this.info.addPedido(position,net); //adiciona pedido de RemindWhenEmpty
     }
 
     private void infected() throws LoggedInException, IOException {
