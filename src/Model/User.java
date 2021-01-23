@@ -1,6 +1,7 @@
 package Model;
 
 import Server.TaggedConnection;
+import Utils.Tuple;
 
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
@@ -10,9 +11,10 @@ public class User {
     String password;
     Tuple<Integer,Integer> posicao;
     boolean infetado;
+    boolean deveSerNotificado; // boolean que indica se user deve ser notifcado de ter estado em contacto, será usado quando o user não estava logado e a notificação aconteceu
     Set<String> encontros; //users com quem se encontrou
     TaggedConnection dOatual; //TaggedConnection do user caso esteja logado senão será null
-    static ReentrantLock l = new ReentrantLock();
+    ReentrantLock l = new ReentrantLock();
 
     public User(String username,String password) {
         this.username=username;
@@ -20,6 +22,7 @@ public class User {
         this.posicao= null;
         this.infetado=false;
         this.encontros = new HashSet<>();
+        this.deveSerNotificado=false;
     }
 
     public boolean passwordCorreta(String pass) {
@@ -163,5 +166,25 @@ public class User {
 
     public void unlock() {
         l.unlock();
+    }
+
+    public void setDeveSerNotificado(boolean b) {
+        try {
+            l.lock();
+            deveSerNotificado=b;
+        }
+        finally {
+            l.unlock();
+        }
+    }
+
+    public boolean isDeveSerNotificado() {
+        try {
+            l.lock();
+            return deveSerNotificado;
+        }
+        finally {
+            l.unlock();
+        }
     }
 }

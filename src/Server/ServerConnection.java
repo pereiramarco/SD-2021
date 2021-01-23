@@ -12,6 +12,7 @@ import Exceptions.UtilizadorExistenteException;
 import Model.*;
 import Utils.Frame;
 import Utils.Tag;
+import Utils.Tuple;
 
 public class ServerConnection implements Runnable {
     private final TaggedConnection tC;
@@ -102,6 +103,11 @@ public class ServerConnection implements Runnable {
                 this.loggedIn=true;
                 data.add(username.getBytes()); //envia o userID que deu login para permitir apresentar no ecrã de forma bonita
                 this.tC.send(Tag.LOGIN, data);
+                if (this.info.userDeveSerNotificado(username)) {
+                    tC.send(Tag.DANGER, null);
+                    this.info.setUserDeveSerNotificado(username, false);
+                }
+                System.out.println("aqui n tou");
                 this.info.addDOAtualToUser(username, this.tC); // se o login for sucessful queremos mudar a TaggedConnection
             }
         }
@@ -155,17 +161,17 @@ public class ServerConnection implements Runnable {
         this.tC.send(Tag.NUMOFPEOPLEON,data);
     }
 
-    private void remindWhenEmpty(List<byte[]> commandData) throws LoggedInException {
+    private void remindWhenEmpty(List<byte[]> commandData) throws LoggedInException, IOException {
         if (!this.loggedIn) {
             throw new LoggedInException("Não tem sessão iniciada");
         }
 
         Tuple<Integer,Integer> position=new Tuple<>(Integer.valueOf(new String(commandData.get(0))),
                 Integer.valueOf(new String(commandData.get(1))));
-        // lançar uma classe que ficará à espera que a posição fique vazia
+        // lançar uma thread que ficará à espera que a posição fique vazia
+        if (info.getNumOfPeopleOn(position)!=0) tC.send(Tag.REMINDWHENEMPTY,null);
         NotifierEmptyPosition net = new NotifierEmptyPosition(this.info,username,position);
         Thread th  = new Thread(net);
-
         th.start();
     }
 

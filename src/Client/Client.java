@@ -7,14 +7,16 @@ import java.io.*;
 import java.net.Socket;
 
 public class Client {
-    static Socket s;
-
-    static ReplyHandler rH;
-    static InputHandler iH;
-
-    static IO o;
 
     public static void main(String[] args) throws IOException, InterruptedException {
+
+        Socket s;
+
+        ReplyHandler rH;
+        InputHandler iH;
+
+        IO o;
+
         s = new Socket("localhost", 12345);
 
         o = new IO(); // Classe responsável pela View
