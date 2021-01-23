@@ -1,16 +1,14 @@
 package Server;
 
 import Model.Info;
-import Model.Posicao;
-import Model.Tuple;
+import Model.InfoPosicao;
+import Utils.Tuple;
 import Model.User;
 import Utils.Frame;
 import Utils.Tag;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class NotifierEmptyPosition implements Runnable{
     Tuple<Integer,Integer> coord;
@@ -25,10 +23,10 @@ public class NotifierEmptyPosition implements Runnable{
 
     @Override
     public void run() {
-        Posicao posicao = i.getPosicao(coord);
+        InfoPosicao infoPosicao = i.getPosicao(coord);
         try {
-            while (i.getNumOfPeopleOn(coord)!=0){
-                posicao.await();
+            while (i.getNumOfPeopleOn(coord)!=0 || u.getTCatual()==null){
+                infoPosicao.await();
             }
             u.lock();
             TaggedConnection tc = u.getTCatual();

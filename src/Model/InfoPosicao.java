@@ -5,13 +5,13 @@ import java.util.Set;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class Posicao {
+public class InfoPosicao {
     private Set<String> usersNaPosicao;
     private Set<String> historico;
     private ReentrantLock l;
     private Condition c;
 
-    public Posicao() {
+    public InfoPosicao() {
         usersNaPosicao = new HashSet<>();
         historico = new HashSet<>();
         l = new ReentrantLock();

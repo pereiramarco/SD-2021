@@ -1,8 +1,8 @@
 package Model;
 
-import Server.NotifierEmptyPosition;
 import Server.NotifyInfectedContact;
 import Server.TaggedConnection;
+import Utils.Tuple;
 
 import java.io.IOException;
 import java.util.*;
@@ -11,7 +11,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 // Informação que o Servidor tem de reter
 public class Info {
     private Tuple<Integer,Integer> mapDimensions;
-    private Map<Tuple<Integer,Integer>, Posicao> mapa; //a chave será a localização e o value será uma lista dos ids dos utilizadores que estão nessa mesma localização
+    private Map<Tuple<Integer,Integer>, InfoPosicao> mapa; //a chave será a localização e o value será a Classe Posição
     private Map<String,User> users; //todos os users no sistema
     private Set<String> vipUsers; // utilizadores que são vip
     private ReentrantReadWriteLock l;
@@ -28,7 +28,7 @@ public class Info {
         vipUsers=new HashSet<>();
         for(int i = 0; i < mapDimensions.getFirst(); i++)
             for(int j = 0 ; j < mapDimensions.getSecond(); j++)
-                mapa.put(new Tuple<>(i,j),new Posicao());
+                mapa.put(new Tuple<>(i,j),new InfoPosicao());
     }
 
     public void updateCoords(Tuple<Integer,Integer> pos,String id) {
@@ -72,6 +72,7 @@ public class Info {
         try {
             wl.lock();
             users.get(user).setTCatual(taggedConnection); //modifica a taggedConnection do user visto que ele pode dar login noutra sessão de terminal
+            signalPedidosTodos();
         }
         finally {
             wl.unlock();
@@ -96,8 +97,14 @@ public class Info {
             mapa.get(u.getPosicao()).removeUser(u.username); // remove o infetado da posição pois assume-se que ele volta para casa
             u.setPosicao(null);
             for (String us : u.getEncontros()) { // notifica cada um dos users com quem esteve em contacto de que estiveram emc ontacto com um infetado
-                Thread th = new Thread(new NotifyInfectedContact(users.get(us).getTCatual()));
-                th.start();
+                TaggedConnection tCC = users.get(us).getTCatual();
+                if (tCC!=null) {
+                    Thread th = new Thread(new NotifyInfectedContact(tCC));
+                    th.start();
+                }
+                else {
+                    users.get(us).setDeveSerNotificado(true);
+                }
             }
         } finally {
             wl.unlock();
@@ -158,7 +165,7 @@ public class Info {
         Map<Tuple<Integer,Integer>,Tuple<Integer,Integer>> res = new HashMap<>();
         try {
             rl.lock();
-            for (Map.Entry<Tuple<Integer,Integer>,Posicao> t : mapa.entrySet()) { // em todas as posições verifica se para cada user no Set dessa posição está infetado ou não
+            for (Map.Entry<Tuple<Integer,Integer>, InfoPosicao> t : mapa.entrySet()) { // em todas as posições verifica se para cada user no Set dessa posição está infetado ou não
                 int u=0,d=0;
                 for (String s : t.getValue().getHistorico()) {
                     if (isInfetado(s))
@@ -186,7 +193,7 @@ public class Info {
         }
     }
 
-    public Posicao getPosicao(Tuple<Integer,Integer> coord) {
+    public InfoPosicao getPosicao(Tuple<Integer,Integer> coord) {
         try {
             rl.lock();
             return mapa.get(coord);
@@ -204,12 +211,54 @@ public class Info {
             rl.unlock();
         }
     }
-// -> NO LOCK?? //
+
+
+    private void signalPedidosTodos() {
+        try {
+            rl.lock();
+            mapa.values().forEach(InfoPosicao::signallAll);
+        } finally {
+            rl.unlock();
+        }
+    }
+
     public boolean userExiste(String username) {
-        return users.containsKey(username);
+        try {
+            rl.lock();
+            return users.containsKey(username);
+        }
+        finally {
+            rl.unlock();
+        }
     }
 
     public User getUser(String userID) {
-        return users.get(userID);
+        try {
+            rl.lock();
+            return users.get(userID);
+        }
+        finally {
+            rl.unlock();
+        }
+    }
+
+    public boolean userDeveSerNotificado(String username) {
+        try {
+            rl.lock();
+            return getUser(username).isDeveSerNotificado();
+        }
+        finally {
+            rl.unlock();
+        }
+    }
+
+    public void setUserDeveSerNotificado(String username,boolean b) {
+        try {
+            wl.lock();
+            getUser(username).setDeveSerNotificado(b);
+        }
+        finally {
+            wl.unlock();
+        }
     }
 }

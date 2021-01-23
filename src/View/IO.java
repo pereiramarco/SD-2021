@@ -1,11 +1,11 @@
 package View;
 
-import Model.Tuple;
+import Utils.Tuple;
 import Utils.Colors;
 import Utils.Tag;
 
 import java.io.*;
-import java.util.Scanner;
+import java.util.List;
 
 public class IO {
     BufferedReader userIn;
@@ -56,12 +56,16 @@ public class IO {
         System.out.println("Na posição "+t.toString() + " estão "+n+" utilizadores");
     }
 
-    public void remindEmpty(Tuple<Integer,Integer> t) {
-        System.out.println("A posição "+t.toString()+" está vazia");
+    public void remindEmpty(List<byte[]> data) {
+        if (data.isEmpty()) System.out.println("Essa posição está atualmente ocupada mas será notificado quando estiver vazia");
+        else {
+            Tuple<Integer, Integer> t1 = new Tuple<>(Integer.parseInt(new String(data.get(0))), Integer.parseInt(new String(data.get(1))));
+            System.out.println("A posição " + t1.toString() + " está vazia");
+        }
     }
 
     public void mapData(Tuple<Integer,Integer> pos,Tuple<Integer,Integer> info) {
-        System.out.println("Na posição "+pos.toString()+" estiveram "+ info.getFirst()+" utilizadores e "+info.getSecond() + " doentes");
+        System.out.println("Na posição "+pos.toString()+" estiveram "+ info.getFirst()+" utilizadores não infetados e "+info.getSecond() + " utilizadores infetados");
     }
 
     public void file(String filename) {
