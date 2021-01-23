@@ -80,7 +80,4 @@ public class TaggedConnection implements AutoCloseable {
         socket.close();
     }
 
-    public boolean isConnected() {
-        return socket.isConnected();
-    }
 }

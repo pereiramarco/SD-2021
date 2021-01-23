@@ -19,7 +19,7 @@ public class Info {
     private ReentrantReadWriteLock.WriteLock wl;
 
     public Info() {
-        mapDimensions = new Tuple<>(40,40);
+        mapDimensions = new Tuple<>(20,20);
         mapa = new HashMap<>();
         users = new HashMap<>();
         l = new ReentrantReadWriteLock();
@@ -165,7 +165,8 @@ public class Info {
                         d++;
                     else u++;
                 }
-                res.put(t.getKey(),new Tuple<>(u,d));
+                if(u > 0 || d > 0)
+                    res.put(t.getKey(),new Tuple<>(u,d));
             }
 
             return res;
