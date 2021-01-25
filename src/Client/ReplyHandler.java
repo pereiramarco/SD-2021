@@ -7,6 +7,10 @@ import Utils.Tag;
 import View.IO;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ReplyHandler implements Runnable {
     TaggedConnection dI;
@@ -33,9 +37,14 @@ public class ReplyHandler implements Runnable {
                     case ERROR -> o.error(new String(f.data.get(0))); //apresenta o erro enviado no frame
                     case LOGIN -> o.welcome(new String(f.data.get(0)));
                     case GETMAPDATA -> {
-                        t1 = new Tuple<>(Integer.parseInt(new String(f.data.get(0))), Integer.parseInt(new String(f.data.get(1))));
-                        t2 = new Tuple<>(Integer.parseInt(new String(f.data.get(2))), Integer.parseInt(new String(f.data.get(3))));
-                        o.mapData(t1, t2); //apresenta os 2 tuplos de forma a perceber o que significam (primeiro é a posição o segundo é o número de utilizadores que estiveram nessa posição e o número de doentes também nessa posição
+                        int tamanho = Integer.parseInt(new String(f.data.get(0)));
+                        Map<Tuple<Integer,Integer>,Tuple<Integer,Integer>> grelha=new HashMap<>();
+                        for (int i=1;i<=4*tamanho;i+=4) {
+                            t1 = new Tuple<>(Integer.parseInt(new String(f.data.get(i))), Integer.parseInt(new String(f.data.get(i+1))));
+                            t2 = new Tuple<>(Integer.parseInt(new String(f.data.get(i+2))), Integer.parseInt(new String(f.data.get(i+3))));
+                            grelha.put(t1,t2);
+                        }
+                        o.mapData(grelha); //apresenta os 2 tuplos de forma a perceber o que significam (primeiro é a posição o segundo é o número de utilizadores que estiveram nessa posição e o número de doentes também nessa posição
                     }
                     case NUMOFPEOPLEON -> {
                         t1 = new Tuple<>(Integer.parseInt(new String(f.data.get(0))), Integer.parseInt(new String(f.data.get(1))));

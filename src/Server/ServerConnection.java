@@ -219,8 +219,9 @@ public class ServerConnection implements Runnable {
         }
 
         if (this.info.isVIP(username)) {
+            List<byte[]> data = new ArrayList<>(); //data a enviar no frame de resposta
+            data.add(String.valueOf(this.info.getMapData().size()).getBytes()); // adiciona quantas posições irá enviar
             for (Map.Entry<Tuple<Integer,Integer>,Tuple<Integer,Integer>> t : this.info.getMapData().entrySet()) {
-                List<byte[]> data = new ArrayList<>(); //data a enviar no frame de resposta
                 Tuple<Integer,Integer> posicao = t.getKey();
                 int numeroUsers = t.getValue().getFirst();
                 int numeroInfetados = t.getValue().getSecond();
@@ -228,8 +229,8 @@ public class ServerConnection implements Runnable {
                 data.add(String.valueOf(posicao.getSecond()).getBytes()); // adiciona Y
                 data.add(String.valueOf(numeroUsers).getBytes()); //adiciona utilizadores que estiveram em  X Y
                 data.add(String.valueOf(numeroInfetados).getBytes()); //adiciona doentes que estiveram em X Y
-                this.tC.send(new Frame(Tag.GETMAPDATA,data));
             }
+            this.tC.send(new Frame(Tag.GETMAPDATA,data));
         } else {
             throw new LoggedInException("Não tem acesso a esta feature");
         }

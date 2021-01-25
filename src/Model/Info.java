@@ -34,7 +34,6 @@ public class Info {
     public void updateCoords(Tuple<Integer,Integer> pos,String id) {
         try {
             wl.lock();
-            Set<String> s;
             User user = users.get(id);
             Tuple<Integer,Integer> poss=user.getPosicao();
             mapa.get(pos).addUser(id);
