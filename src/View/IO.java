@@ -115,6 +115,7 @@ public class IO {
                 System.out.println(Colors.ANSI_CYAN + "══════╣");
             }
         }
+        System.out.println(Colors.ANSI_RESET);
     }
 
     public void file(String filename) {

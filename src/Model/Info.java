@@ -19,7 +19,7 @@ public class Info {
     private ReentrantReadWriteLock.WriteLock wl;
 
     public Info() {
-        mapDimensions = new Tuple<>(20,20);
+        mapDimensions = new Tuple<>(12,12);
         mapa = new HashMap<>();
         users = new HashMap<>();
         l = new ReentrantReadWriteLock();
@@ -29,6 +29,10 @@ public class Info {
         for(int i = 0; i < mapDimensions.getFirst(); i++)
             for(int j = 0 ; j < mapDimensions.getSecond(); j++)
                 mapa.put(new Tuple<>(i,j),new InfoPosicao());
+    }
+
+    public Tuple<Integer, Integer> getMapDimensions() {
+        return mapDimensions;
     }
 
     public void updateCoords(Tuple<Integer,Integer> pos,String id) {

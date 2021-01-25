@@ -5,10 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import Exceptions.JaNessaPosicaoException;
-import Exceptions.LoggedInException;
-import Exceptions.PassIncorretaException;
-import Exceptions.UtilizadorExistenteException;
+import Exceptions.*;
 import Model.*;
 import Utils.Frame;
 import Utils.Tag;
@@ -50,10 +47,14 @@ public class ServerConnection implements Runnable {
                         case MAKEIMPORTANT -> makeImportant();
                     }
                 }
+                catch (NumberFormatException e) {
+                    data.add("Formato de input errado".getBytes());
+                    this.tC.send(new Frame(Tag.ERROR,data));
+                }
                 catch (IndexOutOfBoundsException e) {
                     data.add("Número errado de argumentos".getBytes());
                     this.tC.send(new Frame(Tag.ERROR,data));
-                } catch (LoggedInException | UtilizadorExistenteException | PassIncorretaException | JaNessaPosicaoException e) {
+                } catch (LoggedInException | UtilizadorExistenteException | PassIncorretaException | JaNessaPosicaoException | ForaDoMapaException e) {
                     data.add(e.getMessage().getBytes());
                     this.tC.send(new Frame(Tag.ERROR,data));
                 }
@@ -107,7 +108,6 @@ public class ServerConnection implements Runnable {
                     tC.send(Tag.DANGER, null);
                     this.info.setUserDeveSerNotificado(username, false);
                 }
-                System.out.println("aqui n tou");
                 this.info.addDOAtualToUser(username, this.tC); // se o login for sucessful queremos mudar a TaggedConnection
             }
         }
@@ -125,13 +125,16 @@ public class ServerConnection implements Runnable {
         }
     }
 
-    private void changePos(List<byte[]> commandData) throws LoggedInException, JaNessaPosicaoException, IOException {
+    private void changePos(List<byte[]> commandData) throws LoggedInException, JaNessaPosicaoException, IOException, ForaDoMapaException {
         if (!this.loggedIn) {
             throw new LoggedInException("Não tem sessão iniciada");
         }
 
         Tuple<Integer,Integer> coords = new Tuple<>(Integer.valueOf(new String(commandData.get(0))),
                 Integer.valueOf(new String(commandData.get(1))));
+        Tuple<Integer,Integer> sizeMap = info.getMapDimensions();
+        if (coords.getFirst()<0 || coords.getFirst()>=sizeMap.getFirst() || coords.getSecond()<0 || coords.getSecond()>=sizeMap.getSecond())
+            throw new ForaDoMapaException("Essa posição não existe");
         if (this.info.getPosition(username)!=null && coords.equals(this.info.getPosition(username))) {
             throw new JaNessaPosicaoException("Já se encontra nesta posicao");
         }

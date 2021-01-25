@@ -12,7 +12,7 @@ ________________________________________________________________________________
   $$                                                                         $$      | | | | | | |
   $$                                                                         $$     $$$$$$$$$$$$$$$$
   $$                                                                         $$     $$            $$
-  $$    signup username password - Criar conta                              $$     $$  Use quit  $$
+  $$    signup username password - Criar conta                               $$     $$  Use quit  $$
   $$    login username password - Iniciar Sessão                             $$     $$  para sair $$
   $$    help - Ajuda                                                         $$     $$            $$
   $$                                                                         $$     $$$$$$$$$$$$$$$$
