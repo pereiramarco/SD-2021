@@ -6,6 +6,7 @@ import Utils.Tag;
 
 import java.io.*;
 import java.util.List;
+import java.util.Map;
 
 public class IO {
     BufferedReader userIn;
@@ -64,8 +65,8 @@ public class IO {
         }
     }
 
-    public void mapData(Tuple<Integer,Integer> pos,Tuple<Integer,Integer> info) {
-        System.out.println("Na posição "+pos.toString()+" estiveram "+ info.getFirst()+" utilizadores não infetados e "+info.getSecond() + " utilizadores infetados");
+    public void mapData(Map<Tuple<Integer,Integer>,Tuple<Integer,Integer>> grelha) {
+        //código do mestre Pedro
     }
 
     public void file(String filename) {
